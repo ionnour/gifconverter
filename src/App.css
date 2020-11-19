@@ -2,7 +2,7 @@
   text-align: center;
 }
 .App code {
-  background: #FFF3;
+  background: #fff3;
   padding: 4px 8px;
   border-radius: 4px;
 }
@@ -12,6 +12,28 @@
 .App-logo {
   height: 40vmin;
   pointer-events: none;
+}
+
+.card {
+  width: 25rem;
+
+  margin: auto;
+  vertical-align: auto;
+}
+
+root {
+  min-width: 275;
+}
+bullet {
+  display: 'inline-block';
+  margin: '0 2px';
+  transform: 'scale(0.8)';
+}
+title {
+  font-size: 14;
+}
+pos {
+  margin-bottom: 12;
 }
 
 @media (prefers-reduced-motion: no-preference) {

@@ -1,39 +1,78 @@
 import React, { useState, useEffect } from 'react';
-import logo from './logo.svg';
 import './App.css';
+import 'bootstrap/dist/css/bootstrap.css';
+
+import {createFFmpeg, fetchFile} from '@ffmpeg/ffmpeg';
+const ffmpeg = createFFmpeg({log: true})//to see what dosein the console
 
 function App() {
-  // Create the count state.
-  const [count, setCount] = useState(0);
-  // Create the counter (+1 every second).
-  useEffect(() => {
-    const timer = setTimeout(() => setCount(count + 1), 1000);
-    return () => clearTimeout(timer);
-  }, [count, setCount]);
-  // Return the App component.
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.jsx</code> and save to reload.
-        </p>
-        <p>
-          Page has been open for <code>{count}</code> seconds.
-        </p>
-        <p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </p>
-      </header>
+  
+  const [readey, setReadey] = useState(false);
+  const [video, setVideo] = useState();
+  const [gif, setGif] = useState();
+
+  const load = async () => {
+    await ffmpeg.load();
+    setReadey(true);
+  };
+
+  const convertToGif = async () => {
+    //werite the file to memory
+    ffmpeg.FS(
+      'writeFile',
+      'test.mp4',
+      await fetchFile(video)
+    );
+
+    //run the FFMpeg command
+    await ffmpeg.run( '-i', 'test.mp4', '-t', '2.5', '-ss', '2.0', '-f', 'gif', 'out.gif');
+
+    //read the result
+    const data = ffmpeg.FS('readFile', 'out.gif');
+
+    //create a URL
+    const url = URL.createObjectURL(new Blob([data.buffer], {type: 'image/gif'}));
+    setGif(url);
+  }
+
+  useEffect(()=>{
+    load();
+  }, []);
+
+
+  return readey ? (
+    <div className="App container ">
+      
+      <div className="card mt-5" >
+        <div className="card-body">
+          <h5 className="card-title">Convert Video to GIF</h5>
+            {
+            video && <video
+                      controls
+                      width="250"
+                      src={URL.createObjectURL(video)}
+                    ></video>
+            }
+            <div className="m-3 text-center align-items-center">
+            <input className="btn btn-primary" type="file" onChange={(e) => setVideo(e.target.files?.item(0))}/>
+
+            </div>
+
+            <h3 className="card-title"> Result </h3>
+            <div className="m-3">
+            <button className="btn btn-primary" onClick={()=>convertToGif()}>Convert</button>
+            </div>
+
+            {gif && <img src={gif} width="250" />}
+        </div>
+      </div>
+
+      
+      
+
     </div>
-  );
+  ):
+  (<p> Loading ...</p>);
 }
 
 export default App;
